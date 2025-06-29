@@ -1,0 +1,98 @@
+# Lighter Composite Dataset Configuration for CPU
+size: 500  # Reduced total virtual size
+seed: 42    # Seed for reproducibility
+
+datasets:
+  - name: arc_1d
+    weight: 1
+    config:
+      min_size: 5       # Reduced from 10
+      max_size: 15      # Reduced from 30
+      num_train: 2      # Reduced from 3
+      seed: 42
+      size: 200         # Reduced from 500
+
+  - name: basic_arithmetic
+    weight: 1
+    config:
+      min_terms: 2
+      max_terms: 4      # Reduced from 6
+      min_digits: 1
+      max_digits: 3      # Reduced from 4
+      operators: ["+", "-", "*"]  # Removed division
+      allow_parentheses: false    # Simplified
+      allow_negation: false       # Simplified
+      format_style: "natural"
+      whitespace: "single"
+      seed: 1234
+      size: 200         # Reduced from 500
+  
+  - name: base_conversion
+    weight: 1
+    config:
+      min_base: 2
+      max_base: 8       # Reduced from 16
+      min_value: 0
+      max_value: 100    # Reduced from 1000
+      seed: 1239
+      size: 200         # Reduced from 500
+
+  - name: bf
+    weight: 0.5         # Reduced weight as BF can be intensive
+    config: 
+      difficulty: 1
+      seed: 1238
+      size: 100         # Reduced from 500
+
+  - name: binary_matrix
+    weight: 1
+    config:
+      min_n: 2          # Reduced from 3
+      max_n: 6          # Reduced from 10
+      p_zero: 0.3
+      seed: 1236
+      size: 200         # Reduced from 500
+      
+  - name: calendar_arithmetic
+    weight: 0.5         # Reduced weight
+    config:
+      year: 2023
+      offset_upper_bound: 30      # Reduced from 100
+      leap_year_range: 100        # Reduced from 200
+      tasks: ["weekday_of_date", "is_leap_year"]  # Removed complex tasks
+      seed: 1237
+      size: 100         # Reduced from 500
+
+  - name: decimal_arithmetic
+    weight: 0.5         # Reduced weight
+    config:
+      min_terms: 2
+      max_terms: 4      # Reduced from 6
+      min_num_decimal_places: 1
+      max_num_decimal_places: 2    # Reduced from 3
+      precision: 3      # Reduced from 5
+      seed: 1235
+      size: 100         # Reduced from 500
+      
+  - name: fraction_simplification
+    weight: 1
+    config:
+      min_value: 1
+      max_value: 50     # Reduced from 100
+      min_factor: 2
+      max_factor: 50    # Reduced from 100
+      styles: ["plain"] # Removed LaTeX options
+      seed: 1236
+      size: 200         # Reduced from 500
+      
+  - name: propositional_logic
+    weight: 1
+    config:
+      min_vars: 2
+      max_vars: 3       # Reduced from 4
+      min_statements: 2
+      max_statements: 3 # Reduced from 4
+      min_complexity: 1
+      max_complexity: 2 # Reduced from 3
+      seed: 1238
+      size: 200         # Reduced from 500
