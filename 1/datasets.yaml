@@ -5,7 +5,7 @@ datasets:
   - name: arc_1d
     weight: 1
     config:
-      min_size: 8       # Diubah dari 5 ke 8 untuk memenuhi requirement
+      min_size: 8
       max_size: 20
       num_train: 2
       seed: 42
