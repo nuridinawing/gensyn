@@ -9,7 +9,7 @@ cp $HOME/rl-swarm/modal-login/temp-data/userData.json $HOME/ezlabs/
 cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
 # Close Screen and Remove Old Repository
-screen -XS genysyn quit
+screen -XS gensyn quit
 rm -rf testing.zip && cd ~ && rm -rf rl-swarm
 
 # Install Automation Tools
