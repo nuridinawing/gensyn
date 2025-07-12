@@ -4,9 +4,9 @@
 mkdir -p ezlabs
 
 # Copy files to 'ezlabs'
-cp /root/rl-swarm/modal-login/temp-data/userApiKey.json /root/ezlabs/
-cp /root/rl-swarm/modal-login/temp-data/userData.json /root/ezlabs/
-cp /root/rl-swarm/swarm.pem /root/ezlabs/
+cp $HOME/rl-swarm/modal-login/temp-data/userApiKey.json $HOME/ezlabs/
+cp $HOME/rl-swarm/modal-login/temp-data/userData.json $HOME/ezlabs/
+cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
 # Close Screen and Remove Old Repository
 screen -XS gensyn quit && rm -rf officialauto.zip && cd ~ && rm -rf rl-swarm
@@ -21,11 +21,11 @@ wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/officialauto.zip 
 unzip officialauto.zip && \
 cd rl-swarm
 
-# Copy swarm.pem to /root/rl-swarm/
-cp /root/ezlabs/swarm.pem /root/rl-swarm/
+# Copy swarm.pem to $HOME/rl-swarm/
+cp $HOME/ezlabs/swarm.pem $HOME/rl-swarm/
 
 # Create Screen and run commands
 screen -S gensyn -dm bash -c "python3 -m venv .venv && source .venv/bin/activate && chmod +x run_rl_swarm.sh && ./run_rl_swarm.sh"
 
 echo "Script completed. The 'gensyn' screen session should be running in the background."
-echo "Check logs : tail -f /root/rl-swarm/logs/swarm_launcher.log"
+echo "Check logs : tail -f $HOME/rl-swarm/logs/swarm_launcher.log"
