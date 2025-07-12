@@ -9,7 +9,8 @@ cp $HOME/rl-swarm/modal-login/temp-data/userData.json $HOME/ezlabs/
 cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
 # Close Screen and Remove Old Repository
-screen -XS genysyn quit && rm -rf nonofficialauto.zip && cd ~ && rm -rf rl-swarm
+screen -XS genysyn quit
+rm -rf testing.zip && cd ~ && rm -rf rl-swarm
 
 # Install Automation Tools
 sudo apt-get update
@@ -17,8 +18,8 @@ sudo apt-get install expect -y
 
 # Download and Unzip ezlabs7.zip, then change to rl-swarm directory
 sudo apt-get install -y unzip && \
-wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonofficialauto.zip && \
-unzip nonofficialauto.zip && \
+wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/testing.zip && \
+unzip testing.zip && \
 cd rl-swarm
 
 # Copy swarm.pem to $HOME/rl-swarm/
