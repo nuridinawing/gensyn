@@ -29,7 +29,7 @@ cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
 # Stop any existing service
 screen -XS gensyn quit
-rm -rf officialauto.zip && cd ~ && rm -rf rl-swarm
+rm -rf officialauto.zip systemd.zip && cd ~ && rm -rf rl-swarm
 
 # Step 1: Install dependencies
 echo -e "${YELLOW}[1/5] Installing dependencies...${NC}"
