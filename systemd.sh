@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-install script for Gensyn RL Swarm as systemd service
-# Version 1.1 - Fixed
+# Version 1.2 - Fixed undefined variables and service management
 # Run as root
 
 # Colors
@@ -9,6 +9,9 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+# Service name
+SERVICE_NAME="gensyn-swarm"
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
@@ -19,43 +22,46 @@ fi
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
 
+systemctl stop "$SERVICE_NAME"
 # Create backup directory
-mkdir -p ezlabs
+mkdir -p /root/ezlabs
 
 # Backup files if they exist
-cp $HOME/rl-swarm/modal-login/temp-data/userApiKey.json $HOME/ezlabs/
-cp $HOME/rl-swarm/modal-login/temp-data/userData.json $HOME/ezlabs/
-cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
+[ -f /root/rl-swarm/modal-login/temp-data/userApiKey.json ] && cp /root/rl-swarm/modal-login/temp-data/userApiKey.json /root/ezlabs/
+[ -f /root/rl-swarm/modal-login/temp-data/userData.json ] && cp /root/rl-swarm/modal-login/temp-data/userData.json /root/ezlabs/
+[ -f /root/rl-swarm/swarm.pem ] && cp /root/rl-swarm/swarm.pem /root/ezlabs/
 
 # Stop any existing service
-screen -XS gensyn quit
-rm -rf officialauto.zip systemd.zip && cd ~ && rm -rf rl-swarm
+systemctl stop "$SERVICE_NAME" 2>/dev/null
+screen -XS gensyn quit 2>/dev/null
+rm -rf /root/officialauto.zip /root/systemd.zip /root/rl-swarm
 
 # Step 1: Install dependencies
 echo -e "${YELLOW}[1/5] Installing dependencies...${NC}"
 apt-get update
-apt-get install -y expect unzip wget
+apt-get install -y expect unzip wget python3-venv
 
 # Step 2: Download and setup
 echo -e "${YELLOW}[2/5] Downloading and setting up application...${NC}"
 cd /root
-rm -rf rl-swarm nonofficialauto.zip systemd.zip 2>/dev/null
-wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/systemd.zip
-unzip systemd.zip
+wget -q https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/systemd.zip
+unzip -q systemd.zip
 
-cp $HOME/ezlabs/swarm.pem $HOME/rl-swarm/
+# Restore backup files if they exist
+[ -f /root/ezlabs/swarm.pem ] && cp /root/ezlabs/swarm.pem /root/rl-swarm/
 
 # Step 3: Setup virtual environment
 echo -e "${YELLOW}[3/5] Setting up Python environment...${NC}"
-cd $HOME/rl-swarm
+cd /root/rl-swarm
 python3 -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt 2>/dev/null
 chmod +x run_rl_swarm.sh run_gensyn_auto.exp
 
 # Step 4: Create systemd service
 echo -e "${YELLOW}[4/5] Creating systemd service...${NC}"
 
-sudo tee /etc/systemd/system/gensyn-swarm.service > /dev/null <<'EOF'
+cat > /etc/systemd/system/"$SERVICE_NAME".service <<EOF
 [Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
@@ -86,13 +92,12 @@ EOF
 # Step 5: Enable and start service
 echo -e "${YELLOW}[5/5] Starting service...${NC}"
 systemctl daemon-reload
-systemctl enable $SERVICE_NAME
-systemctl start $SERVICE_NAME
-sudo systemctl restart gensyn-swarm
+systemctl enable "$SERVICE_NAME"
+systemctl start "$SERVICE_NAME"
 
 # Verification
 sleep 5
-SERVICE_STATUS=$(systemctl is-active $SERVICE_NAME)
+SERVICE_STATUS=$(systemctl is-active "$SERVICE_NAME")
 
 if [ "$SERVICE_STATUS" = "active" ]; then
     echo -e "${GREEN}Service is running successfully!${NC}"
