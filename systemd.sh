@@ -22,7 +22,6 @@ fi
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
 
-systemctl stop "$SERVICE_NAME"
 # Create backup directory
 mkdir -p /root/ezlabs
 
