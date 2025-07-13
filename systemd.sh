@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-install script for Gensyn RL Swarm as systemd service
-# Version 1.5 - With enhanced checks and error handling
+# Version 1.6 - Fixed systemd service configuration
 # Run as root
 
 # Colors
@@ -24,7 +24,6 @@ fi
 stop_existing_service() {
     echo -e "${YELLOW}[+] Stopping existing service...${NC}"
     
-    # Stop systemd service
     if systemctl is-active --quiet "$SERVICE_NAME"; then
         systemctl stop "$SERVICE_NAME"
         systemctl disable "$SERVICE_NAME"
@@ -33,18 +32,15 @@ stop_existing_service() {
         echo -e "${YELLOW}Service was not running${NC}"
     fi
     
-    # Kill any remaining processes
     pkill -f "run_gensyn_auto.exp" || true
     pkill -f "rl-swarm" || true
-    
-    # Clean up screen sessions
     screen -XS gensyn quit 2>/dev/null || true
 }
 
 # Function to verify service file content
 verify_service_file() {
     local expected_content=$(cat <<'EOF'
-[[Unit]
+[Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
 StartLimitIntervalSec=0
@@ -58,6 +54,7 @@ Restart=always
 RestartSec=5s
 Environment="PYTHONUNBUFFERED=1"
 Environment="CONNECT_TO_TESTNET=true"
+Environment="HF_HUB_ENABLE_HF_TRANSFER=1"
 
 StandardOutput=journal
 StandardError=journal
@@ -85,19 +82,15 @@ EOF
 
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
-
-# Stop any existing services first
 stop_existing_service
-
-# Create backup directory
 mkdir -p /root/ezlabs
 
-# Backup files if they exist
+# Backup files
 [ -f /root/rl-swarm/modal-login/temp-data/userApiKey.json ] && cp /root/rl-swarm/modal-login/temp-data/userApiKey.json /root/ezlabs/
 [ -f /root/rl-swarm/modal-login/temp-data/userData.json ] && cp /root/rl-swarm/modal-login/temp-data/userData.json /root/ezlabs/
 [ -f /root/rl-swarm/swarm.pem ] && cp /root/rl-swarm/swarm.pem /root/ezlabs/
 
-# Cleanup old files
+# Cleanup
 rm -rf /root/officialauto.zip /root/systemd.zip /root/rl-swarm
 
 # Step 1: Install dependencies
@@ -117,7 +110,7 @@ unzip -q systemd.zip || {
     exit 1
 }
 
-# Restore backup files
+# Restore backups
 mkdir -p /root/rl-swarm/modal-login/temp-data
 [ -f /root/ezlabs/swarm.pem ] && cp /root/ezlabs/swarm.pem /root/rl-swarm/
 [ -f /root/ezlabs/userApiKey.json ] && cp /root/ezlabs/userApiKey.json /root/rl-swarm/modal-login/temp-data/
@@ -131,10 +124,9 @@ source .venv/bin/activate
 pip install -r requirements.txt 2>/dev/null
 chmod +x run_rl_swarm.sh run_gensyn_auto.exp
 
-# Step 4: Create systemd service with custom configuration
+# Step 4: Create systemd service
 echo -e "${YELLOW}[4/5] Configuring systemd service...${NC}"
 
-# Only update service file if needed
 if ! verify_service_file; then
     cat > "$SERVICE_FILE" <<'EOF'
 [Unit]
@@ -151,6 +143,7 @@ Restart=always
 RestartSec=5s
 Environment="PYTHONUNBUFFERED=1"
 Environment="CONNECT_TO_TESTNET=true"
+Environment="HF_HUB_ENABLE_HF_TRANSFER=1"
 
 StandardOutput=journal
 StandardError=journal
@@ -159,7 +152,6 @@ SyslogIdentifier=gensyn-swarm
 [Install]
 WantedBy=multi-user.target
 EOF
-
     echo -e "${GREEN}Service file created/updated successfully${NC}"
 fi
 
@@ -179,7 +171,7 @@ if [ "$SERVICE_STATUS" = "active" ]; then
     echo -e "To view logs: ${YELLOW}journalctl -u $SERVICE_NAME -f${NC}"
 else
     echo -e "${RED}Error: Service failed to start. Status: $SERVICE_STATUS${NC}"
-    echo -e "Check logs with: ${YELLOW}journalctl -u $SERVICE_NAME -xe${NC}"
+    journalctl -u "$SERVICE_NAME" -xe --no-pager | tail -n 20
     exit 1
 fi
 
