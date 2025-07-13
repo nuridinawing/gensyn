@@ -44,7 +44,7 @@ stop_existing_service() {
 # Function to verify service file content
 verify_service_file() {
     local expected_content=$(cat <<'EOF'
-[Unit]
+[[Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
 StartLimitIntervalSec=0
