@@ -19,7 +19,6 @@ fi
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
 
-sudo systemctl stop gensyn-swarm
 # Create backup directory
 mkdir -p ezlabs
 
@@ -89,6 +88,7 @@ echo -e "${YELLOW}[5/5] Starting service...${NC}"
 systemctl daemon-reload
 systemctl enable $SERVICE_NAME
 systemctl start $SERVICE_NAME
+sudo systemctl restart gensyn-swarm
 
 # Verification
 sleep 5
