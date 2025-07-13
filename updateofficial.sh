@@ -20,7 +20,7 @@ sudo apt-get install expect -y
 sudo apt-get install -y unzip && \
 wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/officialauto.zip && \
 unzip officialauto.zip && \
-cd rl-swarm
+cd ~/rl-swarm
 
 # Copy swarm.pem to $HOME/rl-swarm/
 cp $HOME/ezlabs/swarm.pem $HOME/rl-swarm/
