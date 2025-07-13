@@ -19,8 +19,8 @@ sudo apt-get update
 sudo apt-get install expect unzip -y
 
 # Download and Unzip ezlabs7.zip, then change to rl-swarm directory
-wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonofficialauto.zip && \
-unzip nonofficialauto.zip && \
+wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonroot.zip && \
+unzip nonroot.zip && \
 cd ~/rl-swarm
 
 # Copy swarm.pem to $HOME/rl-swarm/
