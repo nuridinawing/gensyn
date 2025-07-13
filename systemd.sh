@@ -19,6 +19,7 @@ fi
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
 
+sudo systemctl stop gensyn-swarm
 # Create backup directory
 mkdir -p ezlabs
 
@@ -55,10 +56,7 @@ chmod +x run_rl_swarm.sh run_gensyn_auto.exp
 # Step 4: Create systemd service
 echo -e "${YELLOW}[4/5] Creating systemd service...${NC}"
 
-SERVICE_NAME="gensyn-swarm"
-SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
-
-cat > "$SERVICE_FILE" <<EOL
+sudo tee /etc/systemd/system/gensyn-swarm.service > /dev/null <<'EOF'
 [Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
@@ -84,7 +82,7 @@ TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
-EOL
+EOF
 
 # Step 5: Enable and start service
 echo -e "${YELLOW}[5/5] Starting service...${NC}"
