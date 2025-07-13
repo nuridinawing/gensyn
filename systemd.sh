@@ -60,28 +60,27 @@ SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 cat > "$SERVICE_FILE" <<EOL
 [Unit]
-Description=Gensyn RL Swarm Auto-Restart Service
+Description=Gensyn RL Swarm Service
 After=network.target
+StartLimitIntervalSec=0
 
 [Service]
+Type=simple
 User=root
 WorkingDirectory=/root/rl-swarm
-
-# Activate venv and run Expect script
-ExecStart=/bin/bash -c 'source /root/rl-swarm/.venv/bin/activate && /usr/bin/expect /root/rl-swarm/run_gensyn_auto.exp'
-
-# Restart policy
+ExecStart=/usr/bin/expect /root/rl-swarm/run_gensyn_auto.exp
 Restart=always
 RestartSec=5s
-
-# Environment variables
 Environment="PYTHONUNBUFFERED=1"
 Environment="CONNECT_TO_TESTNET=true"
 
-# Log management
 StandardOutput=journal
 StandardError=journal
-SyslogIdentifier=$SERVICE_NAME
+SyslogIdentifier=gensyn-swarm
+
+# Important for process management
+KillMode=process
+TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
