@@ -1,8 +1,7 @@
-cat <<'EOF' > setup_monitor.sh
 #!/bin/bash
 
 # ==============================================================================
-#  Skrip untuk Setup Monitoring Gensyn Node & Menambahkan Cron Job
+#  Skrip untuk Setup Monitoring Gensyn & Menambahkan Cron Job dengan Aman
 # ==============================================================================
 
 # Periksa apakah skrip dijalankan sebagai root (dengan sudo)
@@ -58,11 +57,3 @@ echo ""
 echo "🎉 Setup Selesai!"
 echo "Untuk memeriksa cron job root, jalankan: sudo crontab -l"
 echo "Untuk melihat log restart, jalankan: cat /root/gensyn_restart.log"
-
-EOF
-
-# Memberikan izin eksekusi pada skrip setup
-chmod +x setup_monitor.sh
-
-echo "Skrip 'setup_monitor.sh' telah dibuat. Untuk menjalankan, gunakan perintah:"
-echo "sudo ./setup_monitor.sh"
