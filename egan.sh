@@ -1,7 +1,5 @@
 #!/bin/bash
 
-rm -rf officialauto.zip nonofficialauto.zip
-
 # Create directory 'ezlabs'
 mkdir -p ezlabs
 
@@ -13,20 +11,14 @@ cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 # Close Screen and Remove Old Repository
 screen -XS gensyn quit
 
-# Install Automation Tools
-sudo apt-get update
-sudo apt-get install expect unzip -y
-
-# Download and Unzip ezlabs7.zip, then change to rl-swarm directory
-wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonofficialauto.zip && \
-unzip nonofficialauto.zip && \
+# Change to rl-swarm directory
 cd ~/rl-swarm
 
 # Copy swarm.pem to $HOME/rl-swarm/
 cp $HOME/ezlabs/swarm.pem $HOME/rl-swarm/
 
 # Create Screen and run commands
-screen -S gensyn -dm bash -c "python3 -m venv .venv && source .venv/bin/activate && chmod +x run_rl_swarm.sh && ./run_rl_swarm.sh"
+screen -S gensyn -dm bash -c "./run_rl_swarm.sh"
 
 echo "Script completed. The 'gensyn' screen session should be running in the background."
 echo "Check logs : tail -f $HOME/rl-swarm/logs/swarm_launcher.log"
