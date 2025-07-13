@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-install script for Gensyn RL Swarm as systemd service
-# Version 1.4 - With custom service file configuration
+# Version 1.5 - With enhanced checks and error handling
 # Run as root
 
 # Colors
@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 
 # Service name
 SERVICE_NAME="gensyn-swarm"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 
 # Check if running as root
 if [ "$EUID" -ne 0 ]; then
@@ -28,6 +29,8 @@ stop_existing_service() {
         systemctl stop "$SERVICE_NAME"
         systemctl disable "$SERVICE_NAME"
         echo -e "${GREEN}Systemd service stopped successfully${NC}"
+    else
+        echo -e "${YELLOW}Service was not running${NC}"
     fi
     
     # Kill any remaining processes
@@ -36,6 +39,48 @@ stop_existing_service() {
     
     # Clean up screen sessions
     screen -XS gensyn quit 2>/dev/null || true
+}
+
+# Function to verify service file content
+verify_service_file() {
+    local expected_content=$(cat <<'EOF'
+[Unit]
+Description=Gensyn RL Swarm Service
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/rl-swarm
+ExecStart=/usr/bin/expect /root/rl-swarm/run_gensyn_auto.exp
+Restart=always
+RestartSec=5s
+Environment="PYTHONUNBUFFERED=1"
+Environment="CONNECT_TO_TESTNET=true"
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=gensyn-swarm
+
+[Install]
+WantedBy=multi-user.target
+EOF
+    )
+
+    if [ -f "$SERVICE_FILE" ]; then
+        current_content=$(cat "$SERVICE_FILE")
+        if [ "$current_content" == "$expected_content" ]; then
+            echo -e "${GREEN}Service file is already up to date${NC}"
+            return 0
+        else
+            echo -e "${YELLOW}Service file needs updating${NC}"
+            return 1
+        fi
+    else
+        echo -e "${YELLOW}Service file does not exist${NC}"
+        return 1
+    fi
 }
 
 # Step 0: Preparation
@@ -63,11 +108,20 @@ apt-get install -y expect unzip wget python3-venv
 # Step 2: Download and setup
 echo -e "${YELLOW}[2/5] Downloading and setting up application...${NC}"
 cd /root
-wget -q https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/systemd.zip
-unzip -q systemd.zip
+wget -q https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/systemd.zip || {
+    echo -e "${RED}Error: Failed to download systemd.zip${NC}"
+    exit 1
+}
+unzip -q systemd.zip || {
+    echo -e "${RED}Error: Failed to unzip systemd.zip${NC}"
+    exit 1
+}
 
-# Restore backup files if they exist
+# Restore backup files
+mkdir -p /root/rl-swarm/modal-login/temp-data
 [ -f /root/ezlabs/swarm.pem ] && cp /root/ezlabs/swarm.pem /root/rl-swarm/
+[ -f /root/ezlabs/userApiKey.json ] && cp /root/ezlabs/userApiKey.json /root/rl-swarm/modal-login/temp-data/
+[ -f /root/ezlabs/userData.json ] && cp /root/ezlabs/userData.json /root/rl-swarm/modal-login/temp-data/
 
 # Step 3: Setup virtual environment
 echo -e "${YELLOW}[3/5] Setting up Python environment...${NC}"
@@ -78,9 +132,11 @@ pip install -r requirements.txt 2>/dev/null
 chmod +x run_rl_swarm.sh run_gensyn_auto.exp
 
 # Step 4: Create systemd service with custom configuration
-echo -e "${YELLOW}[4/5] Creating systemd service with your configuration...${NC}"
+echo -e "${YELLOW}[4/5] Configuring systemd service...${NC}"
 
-cat > /etc/systemd/system/"$SERVICE_NAME".service <<'EOF'
+# Only update service file if needed
+if ! verify_service_file; then
+    cat > "$SERVICE_FILE" <<'EOF'
 [Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
@@ -103,6 +159,9 @@ SyslogIdentifier=gensyn-swarm
 [Install]
 WantedBy=multi-user.target
 EOF
+
+    echo -e "${GREEN}Service file created/updated successfully${NC}"
+fi
 
 # Step 5: Enable and start service
 echo -e "${YELLOW}[5/5] Starting service...${NC}"
