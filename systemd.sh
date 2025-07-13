@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-install script for Gensyn RL Swarm as systemd service
-# Version 1.2 - Fixed undefined variables and service management
+# Version 1.3 - Enhanced service stopping and cleanup
 # Run as root
 
 # Colors
@@ -19,8 +19,30 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Enhanced service stopping function
+stop_existing_service() {
+    echo -e "${YELLOW}[+] Stopping existing service...${NC}"
+    
+    # Stop systemd service
+    if systemctl is-active --quiet "$SERVICE_NAME"; then
+        systemctl stop "$SERVICE_NAME"
+        systemctl disable "$SERVICE_NAME"
+        echo -e "${GREEN}Systemd service stopped successfully${NC}"
+    fi
+    
+    # Kill any remaining processes
+    pkill -f "run_gensyn_auto.exp" || true
+    pkill -f "rl-swarm" || true
+    
+    # Clean up screen sessions
+    screen -XS gensyn quit 2>/dev/null || true
+}
+
 # Step 0: Preparation
 echo -e "${YELLOW}[0/5] Preparing system...${NC}"
+
+# Stop any existing services first
+stop_existing_service
 
 # Create backup directory
 mkdir -p /root/ezlabs
@@ -30,9 +52,7 @@ mkdir -p /root/ezlabs
 [ -f /root/rl-swarm/modal-login/temp-data/userData.json ] && cp /root/rl-swarm/modal-login/temp-data/userData.json /root/ezlabs/
 [ -f /root/rl-swarm/swarm.pem ] && cp /root/rl-swarm/swarm.pem /root/ezlabs/
 
-# Stop any existing service
-systemctl stop "$SERVICE_NAME" 2>/dev/null
-screen -XS gensyn quit 2>/dev/null
+# Cleanup old files
 rm -rf /root/officialauto.zip /root/systemd.zip /root/rl-swarm
 
 # Step 1: Install dependencies
