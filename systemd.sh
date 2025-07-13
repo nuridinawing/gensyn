@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Auto-install script for Gensyn RL Swarm as systemd service
-# Version 1.3 - Enhanced service stopping and cleanup
+# Version 1.4 - With custom service file configuration
 # Run as root
 
 # Colors
@@ -77,10 +77,10 @@ source .venv/bin/activate
 pip install -r requirements.txt 2>/dev/null
 chmod +x run_rl_swarm.sh run_gensyn_auto.exp
 
-# Step 4: Create systemd service
-echo -e "${YELLOW}[4/5] Creating systemd service...${NC}"
+# Step 4: Create systemd service with custom configuration
+echo -e "${YELLOW}[4/5] Creating systemd service with your configuration...${NC}"
 
-cat > /etc/systemd/system/"$SERVICE_NAME".service <<EOF
+cat > /etc/systemd/system/"$SERVICE_NAME".service <<'EOF'
 [Unit]
 Description=Gensyn RL Swarm Service
 After=network.target
@@ -99,10 +99,6 @@ Environment="CONNECT_TO_TESTNET=true"
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=gensyn-swarm
-
-# Important for process management
-KillMode=process
-TimeoutStopSec=5
 
 [Install]
 WantedBy=multi-user.target
