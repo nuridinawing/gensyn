@@ -8,6 +8,8 @@ cp $HOME/rl-swarm/modal-login/temp-data/userApiKey.json $HOME/ezlabs/
 cp $HOME/rl-swarm/modal-login/temp-data/userData.json $HOME/ezlabs/
 cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
+screen -XS gensyn quit
+
 # Change to rl-swarm directory
 cd ~/rl-swarm
 
