@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Install Automation Tools
+sudo apt-get update
+sudo apt-get install expect -y
+sudo apt-get install -y unzip
+
 # Remove Old files
 rm -rf officialauto.zip nonofficialauto.zip nonofficialauto2.zip nonofficialauto3.zip
 
@@ -14,11 +19,6 @@ cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 # Close Screen and Remove Old Repository
 screen -XS gensyn quit
 cd ~ && rm -rf rl-swarm
-
-# Install Automation Tools
-sudo apt-get update
-sudo apt-get install expect -y
-sudo apt-get install -y unzip
 
 # Download and Unzip ezlabs7.zip, then change to rl-swarm directory
 wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonofficialauto3.zip && \
