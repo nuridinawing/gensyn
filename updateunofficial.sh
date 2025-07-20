@@ -19,7 +19,8 @@ cp $HOME/rl-swarm/swarm.pem $HOME/ezlabs/
 
 # Close Screen and Remove Old Repository
 screen -XS gensyn quit
-cd ~ && rm -rf rl-swarm
+cd ~
+rm -rf rl-swarm
 
 # Download and Unzip ezlabs7.zip, then change to rl-swarm directory
 wget https://github.com/ezlabsnodes/gensyn/raw/refs/heads/main/nonofficialauto.zip && \
